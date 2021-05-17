@@ -72,7 +72,6 @@ public class LoadToBQFromFeed {
         String getSubscription();
         void setSubscription(String value);
 
-        @Description("BQ Table")
         @Required
         String getOutputTableDataset();
         void setOutputTableDataset(String value);
@@ -81,7 +80,6 @@ public class LoadToBQFromFeed {
         boolean getStreaming();
         void setStreaming(boolean value);
 
-        @Description("Trigger  Height ")
         @Required
         String getTriggerMaxHeight();
         void setTriggerMaxHeight(String value);
@@ -108,12 +106,12 @@ public class LoadToBQFromFeed {
 
         // Retrieve non-serializable parameters
         //String tableNameAttr = options.getTableNameAttr();
-        String tableDataset = options.getOutputTableDataset();
+        //String tableDataset = options.getOutputTableDataset();
         String triggerMaxHeight = options.getTriggerMaxHeight();
         System.out.println("Pipeline = > " + pipeline);
 
         // Build & execute pipeline
-/*        pipeline
+        pipeline
                 .apply(
                         "ReadMessages",
                         PubsubIO.readMessagesWithAttributes().fromTopic(options.getSubscription()))
@@ -125,7 +123,7 @@ public class LoadToBQFromFeed {
                                         (PubsubMessage msg) -> convertJsonToTableRow(new String(msg.getPayload()), triggerMaxHeight))
                                 .withCreateDisposition(CreateDisposition.CREATE_NEVER)
                                 .withWriteDisposition(WriteDisposition.WRITE_APPEND)
-                                .withMethod(BigQueryIO.Write.Method.STREAMING_INSERTS));*/
+                                .withMethod(BigQueryIO.Write.Method.STREAMING_INSERTS));
 
         return pipeline.run();
     }
@@ -146,7 +144,6 @@ public class LoadToBQFromFeed {
                      new ByteArrayInputStream(json.getBytes(StandardCharsets.UTF_8))) {
             row = TableRowJsonCoder.of().decode(inputStream, Context.OUTER);
 
-            //Based on the maximum_water_height attribute send the trigger_alert field will be either true or false
             if(Float.parseFloat(row.get("maximum_water_height").toString()) >= Float.parseFloat(triggerMaxHeight))
                 row.put("trigger_alert", true);
             else
